@@ -129,7 +129,10 @@ int main(int argc, char* argv[]){
 
     //need to be change
     char *filename;
-    std::cin >> filename;
+    if(argc > 1)
+        filename = argv[1];
+    else
+        std::cin >> filename;
 
     class infix in(filename);
     in.postfix();
