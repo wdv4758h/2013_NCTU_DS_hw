@@ -27,7 +27,22 @@ public:
         cout << endl;
     }
 
+    void result(){
+        cout << "Result：" << total << endl;
+    }
+
 private:
+
+    int cal(int a, int b, char op){
+        if(op == '+')
+            return a + b;
+        else if(op == '-')
+            return a - b;
+        else if(op == '*')
+            return a * b;
+        else
+            return a / b;
+    }
 
     unsigned short priority(char &c){
         switch(c){
@@ -73,12 +88,28 @@ private:
         }
     }
 
+    void mk_result(){
+        int tmp[SIZE];
+        unsigned tmp_now = 0;
+        for(unsigned int i = 0; i < post_now; i++){
+            if(post[i] <= '9' && post[i] >= '0'){
+                tmp[tmp_now++] = post[i] - '0';
+            } else {
+                tmp[tmp_now - 2] = cal(tmp[tmp_now - 2], tmp[tmp_now - 1], post[i]);
+                tmp_now--;
+            }
+        }
+
+        total = tmp[0];
+    }
+
     void load(char *filename){
         //open file
         std::ifstream file(filename);
 
         if(file.is_open()){
             mk_postfix(file);
+            mk_result();
             file.close();
         }
         else{
@@ -91,6 +122,7 @@ private:
     char post[SIZE];
     unsigned int op_now;
     unsigned int post_now;
+    int total;
 };
 
 int main(int argc, char* argv[]){
@@ -101,6 +133,7 @@ int main(int argc, char* argv[]){
 
     class infix in(filename);
     in.postfix();
+    in.result();
 
     return 0;
 }
