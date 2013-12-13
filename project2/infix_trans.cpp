@@ -11,19 +11,20 @@ public:
 
     infix(char *filename){
         op_now = 0;
-        pre_now = 0;
-        post_now = 0;
         total = 0;
+        bet = new tree();
         load(filename);
     }
 
+    void prefix(){
+        cout << "Prefix：";
+        _prefix(bet->left);
+        cout << endl;
+    }
+
     void postfix(){
-
         cout << "Postfix：";
-        for(unsigned int i = 0; i < post_now; i++){
-            cout << post[i];
-        }
-
+        _postfix(bet->left);
         cout << endl;
     }
 
@@ -33,7 +34,76 @@ public:
 
 private:
 
-    int cal(int a, int b, char op){
+    class tree {
+    public:
+        tree(){
+            left = NULL;
+            right = NULL;
+            op = ' ';
+            data = 0;
+            op_or_data = 0;
+        }
+
+        tree(char c){
+            left = NULL;
+            right = NULL;
+            op = c;
+            data = 0;
+            op_or_data = 0;
+        }
+
+        tree(double n){
+            left = NULL;
+            right = NULL;
+            op = ' ';
+            data = n;
+            op_or_data = 1;
+        }
+
+        tree(char c, class tree *l, class tree *r){
+            left = l;
+            right = r;
+            op = c;
+            data = 0;
+            op_or_data = 0;
+        }
+
+        class tree *left;
+        class tree *right;
+        char op;
+        double data;
+        unsigned int op_or_data;
+    };
+
+    void _postfix(class tree *now){
+        if(now != NULL){
+            _postfix(now->left);
+            _postfix(now->right);
+
+            cout << " ";
+            if(now->op_or_data){
+                cout << now->data;
+            } else {
+                cout << now->op;
+            }
+        }
+    }
+
+    void _prefix(class tree *now){
+        if(now != NULL){
+            cout << " ";
+            if(now->op_or_data){
+                cout << now->data;
+            } else {
+                cout << now->op;
+            }
+
+            _prefix(now->left);
+            _prefix(now->right);
+        }
+    }
+
+    int cal(double a, double b, char op){
         if(op == '+')
             return a + b;
         else if(op == '-')
@@ -54,53 +124,66 @@ private:
         }
     }
 
-    void mk_postfix(std::ifstream &file){
+    void mk_tree(std::ifstream &file){
+
+        class tree *stack[SIZE];
+        unsigned int stack_now = 0;
+
+        double tmp_data;
+
+        double total_count[SIZE];
+        unsigned int count_now = 0;
+
         char c;
-        while(file >> c){
-            if(c == '('){
 
-                operators[op_now++] = c;
+        while(c = file.peek(), !file.eof()){
 
-            } else if(c == '+' || c == '-' || c == '*' || c == '/'){
+            if(c <= '9' && c >= '0'){
+                file >> tmp_data;
+                stack[stack_now++] = new tree(tmp_data);
 
-                while(priority(c) <= priority(operators[op_now - 1])){
-                    post[post_now++] = operators[--op_now];
-                }
-
-                operators[op_now++] = c;
-
-            } else if(c == ')'){
-
-                while(operators[op_now - 1] != '('){
-                    post[post_now++] = operators[--op_now];
-                }
-
-                op_now--;
+                total_count[count_now++] = tmp_data;
 
             } else {
+                file >> c;
 
-                post[post_now++] = c;
+                if(c == '('){
+
+                    operators[op_now++] = c;
+
+                } else if(c == '+' || c == '-' || c == '*' || c == '/'){
+
+                    while(priority(c) <= priority(operators[op_now - 1])){
+
+                        stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
+                        stack_now--;
+
+                        total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
+                        count_now--;
+
+                    }
+
+                    operators[op_now++] = c;
+
+                } else if(c == ')'){
+
+                    while(operators[op_now - 1] != '('){
+
+                        stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
+                        stack_now--;
+
+                        total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
+                        count_now--;
+
+                    }
+
+                    op_now--;
+                }
             }
         }
+        bet->left = stack[0];
 
-        while(op_now > 0){
-            post[post_now++] = operators[--op_now];
-        }
-    }
-
-    void mk_result(){
-        int tmp[SIZE];
-        unsigned tmp_now = 0;
-        for(unsigned int i = 0; i < post_now; i++){
-            if(post[i] <= '9' && post[i] >= '0'){
-                tmp[tmp_now++] = post[i] - '0';
-            } else {
-                tmp[tmp_now - 2] = cal(tmp[tmp_now - 2], tmp[tmp_now - 1], post[i]);
-                tmp_now--;
-            }
-        }
-
-        total = tmp[0];
+        total = total_count[0];
     }
 
     void load(char *filename){
@@ -108,20 +191,17 @@ private:
         std::ifstream file(filename);
 
         if(file.is_open()){
-            mk_postfix(file);
-            mk_result();
+            mk_tree(file);
             file.close();
-        }
-        else{
+        } else {
             cout << "Can not open file" << endl;
             exit(1);
         }
     }
 
+    class tree *bet;
     char operators[SIZE];
-    char post[SIZE];
     unsigned int op_now;
-    unsigned int post_now;
     int total;
 };
 
@@ -135,6 +215,7 @@ int main(int argc, char* argv[]){
         std::cin >> filename;
 
     class infix in(filename);
+    in.prefix();
     in.postfix();
     in.result();
 
