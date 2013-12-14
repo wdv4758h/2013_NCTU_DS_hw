@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
 using std::cout;
 using std::endl;
@@ -253,6 +254,10 @@ private:
 
 int main(int argc, char* argv[]){
 
+    //start the clock
+    clock_t start,end;
+    start = clock();
+
     //need to be change
     char *filename;
     if(argc > 1)
@@ -264,6 +269,10 @@ int main(int argc, char* argv[]){
     in.prefix();
     in.postfix();
     in.result();
+
+    //end the clock
+    end = clock();
+    cout << (end - start)/(double)(CLOCKS_PER_SEC) * 1000 << "ms" << endl;
 
     return 0;
 }
