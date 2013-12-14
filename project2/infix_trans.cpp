@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 
-#define SIZE 100
+#define SIZE 200
 
 class infix {
 public:
@@ -181,6 +181,15 @@ private:
                 }
             }
         }
+
+        while(stack_now > 1){
+            stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
+            stack_now--;
+
+            total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
+            count_now--;
+        }
+
         bet->left = stack[0];
 
         total = total_count[0];
