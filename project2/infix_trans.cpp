@@ -103,7 +103,7 @@ private:
         }
     }
 
-    int cal(double a, double b, char op){
+    double cal(double a, double b, char op){
         if(op == '+')
             return a + b;
         else if(op == '-')
@@ -211,7 +211,7 @@ private:
     class tree *bet;
     char operators[SIZE];
     unsigned int op_now;
-    int total;
+    double total;
 };
 
 int main(int argc, char* argv[]){
