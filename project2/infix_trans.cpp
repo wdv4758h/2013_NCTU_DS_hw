@@ -145,7 +145,7 @@ private:
                 total_count[count_now++] = tmp_data;
 
             } else {
-                file >> c;
+                file.get(c);
 
                 if(c == '('){
 
