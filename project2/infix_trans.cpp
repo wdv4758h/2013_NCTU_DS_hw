@@ -169,7 +169,7 @@ private:
 
                 } else if(c == '+' || c == '-' || c == '*' || c == '/'){
 
-                    while(priority(c) <= priority(operators[op_now - 1])){
+                    while(op_now && priority(c) <= priority(operators[op_now - 1])){
 
                         is_valid(stack_now, op_now);
 
