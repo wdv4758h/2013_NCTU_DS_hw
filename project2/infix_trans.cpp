@@ -124,6 +124,13 @@ private:
         }
     }
 
+    void is_valid(unsigned int stack_now, unsigned int op_now){
+        if(stack_now < 2 || op_now < 1){
+            cout << "This formula is invalid" << endl;
+            exit(1);
+        }
+    }
+
     void mk_tree(std::ifstream &file){
 
         class tree *stack[SIZE];
@@ -134,6 +141,8 @@ private:
         double total_count[SIZE];
         unsigned int count_now = 0;
 
+        unsigned int op_det = 0;
+
         char c;
 
         while(c = file.peek(), !file.eof()){
@@ -143,6 +152,11 @@ private:
                 stack[stack_now++] = new tree(tmp_data);
 
                 total_count[count_now++] = tmp_data;
+
+                if(count_now > op_det + 1){
+                    cout << "This formula is invalid" << endl;
+                    exit(1);
+                }
 
             } else {
                 file.get(c);
@@ -155,26 +169,39 @@ private:
 
                     while(priority(c) <= priority(operators[op_now - 1])){
 
+                        is_valid(stack_now, op_now);
+
                         stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
                         stack_now--;
 
                         total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
                         count_now--;
 
+                        op_det--;
                     }
 
                     operators[op_now++] = c;
+
+                    op_det++;
+
+                    if(count_now > op_det + 1 || op_det > count_now){
+                        cout << "This formula is invalid" << endl;
+                        exit(1);
+                    }
 
                 } else if(c == ')'){
 
                     while(operators[op_now - 1] != '('){
 
+                        is_valid(stack_now, op_now);
+
                         stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
                         stack_now--;
 
                         total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
                         count_now--;
 
+                        op_det--;
                     }
 
                     op_now--;
@@ -183,11 +210,21 @@ private:
         }
 
         while(stack_now > 1){
+
+            is_valid(stack_now, op_now);
+
             stack[stack_now - 2] = new tree(operators[--op_now], stack[stack_now - 2], stack[stack_now - 1]);
             stack_now--;
 
             total_count[count_now - 2] = cal(total_count[count_now - 2], total_count[count_now - 1], operators[op_now]);
             count_now--;
+
+            op_det--;
+        }
+
+        if(op_now != 0 || stack_now != 1){
+            cout << "This formula is invalid" << endl;
+            exit(1);
         }
 
         bet->left = stack[0];
