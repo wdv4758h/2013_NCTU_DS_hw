@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <cstdlib>  //for exit function
 
 using std::cout;
 using std::endl;
